@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const authenticate = require('../authenticate');
 const multer = require('multer');
 const uploadRouter = express.Router();
-
+const cors = require('cors');
 const storage = multer({
     destination: (req, file, cb) => {
         cb(null, 'public/images');
@@ -24,24 +24,23 @@ const upload = multer({ storage: storage, fileFilter: fileFilter });
 uploadRouter.use(bodyParser.json());
 
 dishRouter.route('/')
+    .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
     .get(authenticate.verifyUser, (req, res, next) => {
         res.statusCode = 403;
         res.end('GET operation not supported on /dishes');
     })
-    .post(authenticate.verifyUser, upload.single('imageFile'), (req, res) => {
+    .post(cors.corsWithOptions, authenticate.verifyUser, upload.single('imageFile'), (req, res) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.json(req.file);
     })
-    .put(authenticate.verifyUser, (req, res, next) => {
+    .put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
         res.statusCode = 403;
         res.end('PUT operation not supported on /dishes');
     })
-    .delete(authenticate.verifyUser, (req, res, next) => {
+    .delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
         res.statusCode = 403;
         res.end('Delete operation not supported on /dishes');
     });
-
-
 
 module.exports = uploadRouter;
